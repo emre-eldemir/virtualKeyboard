@@ -1,0 +1,24 @@
+# Build results
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.cache
+
+# Passwords (IMPORTANT: Never commit passwords!)
+passwords.txt
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
