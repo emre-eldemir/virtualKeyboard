@@ -76,7 +76,7 @@ This application **solves all these problems** by simulating keyboard input at t
 
 ### Option 1: Download Release (Recommended)
 1. Go to [Releases](https://github.com/emre-eldemir/virtualKeyboard/releases)
-2. Download the latest `VirtualKeyboard.exe`
+2. Download the latest `VirtualKeyboard.zip`
 3. Run the executable
 
 ### Option 2: Build from Source
