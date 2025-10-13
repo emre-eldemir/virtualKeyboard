@@ -75,14 +75,14 @@ This application **solves all these problems** by simulating keyboard input at t
 ## 🚀 Installation
 
 ### Option 1: Download Release (Recommended)
-1. Go to [Releases](https://github.com/yourusername/virtualKeyboard/releases)
+1. Go to [Releases](https://github.com/emre-eldemir/virtualKeyboard/releases)
 2. Download the latest `VirtualKeyboard.exe`
 3. Run the executable
 
 ### Option 2: Build from Source
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/virtualKeyboard.git
+git clone https://github.com/emre-eldemir/virtualKeyboard.git
 
 # Navigate to the project directory
 cd virtualKeyboard
@@ -229,7 +229,7 @@ Contributions are welcome! Here's how you can help:
 
 ### Reporting Issues
 
-- Use the [Issue Tracker](https://github.com/yourusername/virtualKeyboard/issues)
+- Use the [Issue Tracker](https://github.com/emre-eldemir/virtualKeyboard/issues)
 - Describe the problem clearly
 - Include steps to reproduce
 - Mention your Windows version and .NET version
@@ -246,7 +246,7 @@ Contributions are welcome! Here's how you can help:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/virtualKeyboard.git
+git clone https://github.com/emre-eldemir/virtualKeyboard.git
 
 # Create a branch
 git checkout -b feature/my-feature
@@ -271,18 +271,6 @@ git push origin feature/my-feature
 - [ ] Import/Export password database
 - [ ] Keyboard shortcuts (hotkeys)
 
-### Version 1.2 (Planned)
-- [ ] Multi-language support
-- [ ] Custom character delay settings
-- [ ] Password strength indicator
-- [ ] Auto-backup feature
-
-### Version 2.0 (Future)
-- [ ] Browser extension integration
-- [ ] Cloud sync (encrypted)
-- [ ] Two-factor authentication support
-- [ ] Password generator
-
 ---
 
 ## 📄 License
@@ -295,8 +283,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Emre Eldemir**
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Project Link: [https://github.com/yourusername/virtualKeyboard](https://github.com/yourusername/virtualKeyboard)
+- GitHub: [@emre-eldemir](https://github.com/emre-eldemir)
+- Project Link: [https://github.com/emre-eldemir/virtualKeyboard](https://github.com/emre-eldemir/virtualKeyboard)
 
 ---
 
