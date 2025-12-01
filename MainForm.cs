@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace VirtualKeyboard
 {
@@ -29,8 +31,11 @@ namespace VirtualKeyboard
         // Controls - Password Management Section
         private TextBox passwordTextBox = null!;
         private TextBox descriptionTextBox = null!;
+        private TextBox usernameTextBox = null!;
+        private ComboBox separatorComboBox = null!;
+        private NumericUpDown speedNumericUpDown = null!;
         private Button savePasswordButton = null!;
-        private ListBox passwordListBox = null!;
+        private DataGridView passwordDataGridView = null!;
         private Button sendPasswordButton = null!;
         private Button deletePasswordButton = null!;
         private GroupBox manualGroupBox = null!;
@@ -52,10 +57,10 @@ namespace VirtualKeyboard
         private void InitializeComponent()
         {
             this.Text = "Virtual Keyboard & Password Manager / Emre Eldemir - 2025";
-            this.Size = new Size(900, 660);
+            this.Size = new Size(900, 770);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MinimumSize = new Size(900, 660);
+            this.MinimumSize = new Size(900, 770);
 
             // Status Label (at the top)
             statusLabel = new Label
@@ -151,7 +156,7 @@ namespace VirtualKeyboard
             {
                 Text = "Password Manager",
                 Location = new Point(20, 235),
-                Size = new Size(840, 370),
+                Size = new Size(840, 480),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold)
             };
             this.Controls.Add(passwordGroupBox);
@@ -210,11 +215,76 @@ namespace VirtualKeyboard
             };
             passwordGroupBox.Controls.Add(descriptionTextBox);
 
+            // Username Label (NEW)
+            Label userLabel = new Label
+            {
+                Text = "Username (Optional):",
+                Location = new Point(15, 125),
+                Size = new Size(150, 20),
+                Font = new Font("Segoe UI", 9F)
+            };
+            passwordGroupBox.Controls.Add(userLabel);
+
+            // Username TextBox (NEW)
+            usernameTextBox = new TextBox
+            {
+                Location = new Point(15, 150),
+                Size = new Size(350, 30),
+                Font = new Font("Segoe UI", 10F),
+                PlaceholderText = "Enter username..."
+            };
+            passwordGroupBox.Controls.Add(usernameTextBox);
+
+            // Separator Label (NEW)
+            Label sepLabel = new Label
+            {
+                Text = "Separator:",
+                Location = new Point(380, 125),
+                Size = new Size(100, 20),
+                Font = new Font("Segoe UI", 9F)
+            };
+            passwordGroupBox.Controls.Add(sepLabel);
+
+            // Separator ComboBox (NEW)
+            separatorComboBox = new ComboBox
+            {
+                Location = new Point(380, 150),
+                Size = new Size(100, 30),
+                Font = new Font("Segoe UI", 10F),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            separatorComboBox.Items.AddRange(new object[] { "TAB", "ENTER" });
+            separatorComboBox.SelectedIndex = 0;
+            passwordGroupBox.Controls.Add(separatorComboBox);
+
+            // Speed Label (NEW)
+            Label speedLabel = new Label
+            {
+                Text = "Speed (ms):",
+                Location = new Point(500, 125),
+                Size = new Size(100, 20),
+                Font = new Font("Segoe UI", 9F)
+            };
+            passwordGroupBox.Controls.Add(speedLabel);
+
+            // Speed NumericUpDown (NEW)
+            speedNumericUpDown = new NumericUpDown
+            {
+                Location = new Point(500, 150),
+                Size = new Size(80, 30),
+                Font = new Font("Segoe UI", 10F),
+                Minimum = 1,
+                Maximum = 1000,
+                Value = 50,
+                Increment = 10
+            };
+            passwordGroupBox.Controls.Add(speedNumericUpDown);
+
             // Password Label
             Label passLabel = new Label
             {
                 Text = "Password:",
-                Location = new Point(380, 65),
+                Location = new Point(15, 185),
                 Size = new Size(100, 20),
                 Font = new Font("Segoe UI", 9F)
             };
@@ -223,11 +293,11 @@ namespace VirtualKeyboard
             // Password TextBox
             passwordTextBox = new TextBox
             {
-                Location = new Point(380, 90),
-                Size = new Size(285, 30),
+                Location = new Point(15, 210),
+                Size = new Size(350, 30),
                 Font = new Font("Segoe UI", 10F),
                 PlaceholderText = "Enter your password here...",
-                UseSystemPasswordChar = false
+                UseSystemPasswordChar = true
             };
             passwordGroupBox.Controls.Add(passwordTextBox);
 
@@ -235,7 +305,7 @@ namespace VirtualKeyboard
             savePasswordButton = new Button
             {
                 Text = "Save",
-                Location = new Point(680, 88),
+                Location = new Point(380, 208),
                 Size = new Size(140, 35),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 BackColor = Color.FromArgb(16, 124, 16),
@@ -251,28 +321,50 @@ namespace VirtualKeyboard
             Label savedLabel = new Label
             {
                 Text = "Saved Passwords:",
-                Location = new Point(15, 135),
+                Location = new Point(15, 255),
                 Size = new Size(150, 20),
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold)
             };
             passwordGroupBox.Controls.Add(savedLabel);
 
-            // Password ListBox
-            passwordListBox = new ListBox
+            // Password DataGridView
+            passwordDataGridView = new DataGridView
             {
-                Location = new Point(15, 160),
+                Location = new Point(15, 280),
                 Size = new Size(650, 180),
-                Font = new Font("Consolas", 9F),
-                BackColor = Color.FromArgb(245, 245, 245)
+                Font = new Font("Segoe UI", 9F),
+                BackgroundColor = Color.FromArgb(245, 245, 245),
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect = false,
+                RowHeadersVisible = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             };
-            passwordListBox.DoubleClick += PasswordListBox_DoubleClick;
-            passwordGroupBox.Controls.Add(passwordListBox);
+
+            // Add Columns
+            passwordDataGridView.Columns.Add("Description", "Description");
+            passwordDataGridView.Columns.Add("Username", "Username");
+            passwordDataGridView.Columns.Add("Separator", "Separator");
+            passwordDataGridView.Columns.Add("Password", "Password");
+            passwordDataGridView.Columns.Add("Speed", "Speed (ms)");
+
+            // Adjust column widths
+            passwordDataGridView.Columns["Description"].FillWeight = 25;
+            passwordDataGridView.Columns["Username"].FillWeight = 25;
+            passwordDataGridView.Columns["Separator"].FillWeight = 15;
+            passwordDataGridView.Columns["Password"].FillWeight = 20;
+            passwordDataGridView.Columns["Speed"].FillWeight = 15;
+
+            passwordDataGridView.CellDoubleClick += PasswordDataGridView_CellDoubleClick;
+            passwordGroupBox.Controls.Add(passwordDataGridView);
 
             // Send Selected Button
             sendPasswordButton = new Button
             {
                 Text = "Send Selected\nPassword",
-                Location = new Point(680, 160),
+                Location = new Point(680, 280),
                 Size = new Size(140, 60),
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 BackColor = Color.FromArgb(0, 120, 215),
@@ -288,7 +380,7 @@ namespace VirtualKeyboard
             deletePasswordButton = new Button
             {
                 Text = "Delete Selected",
-                Location = new Point(680, 230),
+                Location = new Point(680, 350),
                 Size = new Size(140, 40),
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 BackColor = Color.FromArgb(196, 43, 28),
@@ -304,7 +396,7 @@ namespace VirtualKeyboard
             Label infoLabel2 = new Label
             {
                 Text = "TIP: Double-click on a password in the list to send it quickly!",
-                Location = new Point(15, 290),
+                Location = new Point(15, 410),
                 Size = new Size(650, 60),
                 Font = new Font("Segoe UI", 8.5F, FontStyle.Italic),
                 ForeColor = Color.DarkSlateGray
@@ -337,18 +429,32 @@ namespace VirtualKeyboard
 
         private async void SendPasswordButton_Click(object? sender, EventArgs e)
         {
-            if (passwordListBox.SelectedIndex == -1)
+            if (passwordDataGridView.SelectedRows.Count == 0)
             {
                 ShowStatus("⚠ Please select a password to send!", true);
                 return;
             }
 
-            string selectedItem = passwordListBox.SelectedItem?.ToString() ?? "";
-            string password = ExtractPassword(selectedItem);
-
-            if (!string.IsNullOrEmpty(password))
+            var row = passwordDataGridView.SelectedRows[0];
+            if (row.Tag is PasswordEntry entry)
             {
-                await SendTextToKeyboard(password, sendPasswordButton, null);
+                // Send Username if present
+                if (!string.IsNullOrEmpty(entry.Username))
+                {
+                    await SendTextToKeyboard(entry.Username, sendPasswordButton, null, entry.TypingSpeed);
+                    await Task.Delay(100);
+                    
+                    // Send Separator
+                    if (entry.Separator == "ENTER")
+                        SendKey('\n');
+                    else
+                        SendKey('\t');
+                        
+                    await Task.Delay(100);
+                }
+
+                // Send Password
+                await SendTextToKeyboard(entry.Password, sendPasswordButton, null, entry.TypingSpeed);
                 
                 // If auto-enter is enabled, send ENTER key
                 if (autoEnterCheckBox.Checked)
@@ -360,15 +466,15 @@ namespace VirtualKeyboard
             }
         }
 
-        private void PasswordListBox_DoubleClick(object? sender, EventArgs e)
+        private void PasswordDataGridView_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (passwordListBox.SelectedIndex != -1)
+            if (e.RowIndex >= 0)
             {
                 SendPasswordButton_Click(sender, e);
             }
         }
 
-        private async Task SendTextToKeyboard(string text, Button button, ProgressBar? progress)
+        private async Task SendTextToKeyboard(string text, Button button, ProgressBar? progress, int typingDelay = 50)
         {
             button.Enabled = false;
             string originalText = button.Text;
@@ -410,7 +516,7 @@ namespace VirtualKeyboard
                     }
 
                     // Small delay between characters
-                    Thread.Sleep(50);
+                    Thread.Sleep(typingDelay);
                 }
             });
 
@@ -582,23 +688,47 @@ namespace VirtualKeyboard
         {
             string description = descriptionTextBox.Text.Trim();
             string password = passwordTextBox.Text.Trim();
+            string username = usernameTextBox.Text.Trim();
+            string separator = separatorComboBox.SelectedItem?.ToString() ?? "TAB";
+            int speed = (int)speedNumericUpDown.Value;
 
             if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(password))
             {
-                ShowStatus("⚠ Please fill in both description and password fields!", true);
+                ShowStatus("⚠ Please fill in description and password fields!", true);
                 return;
             }
 
             // Save password to file
-            string line = $"{description}|{password}";
-            File.AppendAllText(PasswordFile, line + Environment.NewLine);
+            // Format: Description|Username|Separator|Password|Speed
+            string line = $"{description}|{username}|{separator}|{password}|{speed}";
+            string encryptedLine = Encrypt(line);
+            File.AppendAllText(PasswordFile, encryptedLine + Environment.NewLine);
 
-            // Update ListBox
-            passwordListBox.Items.Add(FormatPasswordEntry(description, password));
+            // Update DataGridView
+            var entry = new PasswordEntry 
+            { 
+                Description = description, 
+                Username = username, 
+                Separator = separator, 
+                Password = password,
+                TypingSpeed = speed
+            };
+            
+            int rowIndex = passwordDataGridView.Rows.Add(
+                entry.Description, 
+                entry.Username, 
+                entry.Separator, 
+                "******",
+                entry.TypingSpeed
+            );
+            passwordDataGridView.Rows[rowIndex].Tag = entry;
 
             // Clear fields
             descriptionTextBox.Clear();
             passwordTextBox.Clear();
+            usernameTextBox.Clear();
+            separatorComboBox.SelectedIndex = 0;
+            speedNumericUpDown.Value = 50;
             descriptionTextBox.Focus();
 
             ShowStatus("✓ Password saved successfully!");
@@ -606,14 +736,16 @@ namespace VirtualKeyboard
 
         private void DeletePasswordButton_Click(object? sender, EventArgs e)
         {
-            if (passwordListBox.SelectedIndex == -1)
+            if (passwordDataGridView.SelectedRows.Count == 0)
             {
                 ShowStatus("⚠ Please select a password to delete!", true);
                 return;
             }
 
-            int selectedIndex = passwordListBox.SelectedIndex;
-            passwordListBox.Items.RemoveAt(selectedIndex);
+            foreach (DataGridViewRow row in passwordDataGridView.SelectedRows)
+            {
+                passwordDataGridView.Rows.Remove(row);
+            }
 
             // Rewrite the file
             SaveAllPasswords();
@@ -629,17 +761,73 @@ namespace VirtualKeyboard
             }
 
             string[] lines = File.ReadAllLines(PasswordFile);
+            bool migrationNeeded = false;
+
             foreach (string line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
-                string[] parts = line.Split('|');
+                // Try to decrypt the line
+                string decryptedLine = Decrypt(line);
+                
+                // If the line was not encrypted (same as input) but should have been (doesn't look like base64), mark for migration
+                if (line == decryptedLine && line.Contains("|"))
+                {
+                    migrationNeeded = true;
+                }
+
+                string[] parts = decryptedLine.Split('|');
+                PasswordEntry? entry = null;
+
                 if (parts.Length == 2)
                 {
-                    string description = parts[0];
-                    string password = parts[1];
-                    passwordListBox.Items.Add(FormatPasswordEntry(description, password));
+                    entry = new PasswordEntry 
+                    { 
+                        Description = parts[0], 
+                        Password = parts[1] 
+                    };
                 }
+                else if (parts.Length == 4)
+                {
+                    entry = new PasswordEntry 
+                    { 
+                        Description = parts[0], 
+                        Username = parts[1],
+                        Separator = parts[2],
+                        Password = parts[3],
+                        TypingSpeed = 50 // Default
+                    };
+                }
+                else if (parts.Length == 5)
+                {
+                    int.TryParse(parts[4], out int speed);
+                    entry = new PasswordEntry 
+                    { 
+                        Description = parts[0], 
+                        Username = parts[1],
+                        Separator = parts[2],
+                        Password = parts[3],
+                        TypingSpeed = speed > 0 ? speed : 50
+                    };
+                }
+
+                if (entry != null)
+                {
+                    int rowIndex = passwordDataGridView.Rows.Add(
+                        entry.Description, 
+                        entry.Username, 
+                        entry.Separator, 
+                        "******",
+                        entry.TypingSpeed
+                    );
+                    passwordDataGridView.Rows[rowIndex].Tag = entry;
+                }
+            }
+
+            // If we found plain text passwords, rewrite the file encrypted
+            if (migrationNeeded)
+            {
+                SaveAllPasswords();
             }
         }
 
@@ -647,70 +835,123 @@ namespace VirtualKeyboard
         {
             List<string> lines = new List<string>();
             
-            foreach (var item in passwordListBox.Items)
+            foreach (DataGridViewRow row in passwordDataGridView.Rows)
             {
-                string itemStr = item.ToString() ?? "";
-                string[] parts = itemStr.Split(new[] { " → " }, StringSplitOptions.None);
-                
-                if (parts.Length == 2)
+                if (row.Tag is PasswordEntry entry)
                 {
-                    string description = parts[0].Trim();
-                    string maskedPassword = parts[1].Trim();
-                    
-                    // Get real password from file
-                    string realPassword = GetRealPassword(description, maskedPassword);
-                    if (!string.IsNullOrEmpty(realPassword))
-                    {
-                        lines.Add($"{description}|{realPassword}");
-                    }
+                    string line = $"{entry.Description}|{entry.Username}|{entry.Separator}|{entry.Password}|{entry.TypingSpeed}";
+                    lines.Add(Encrypt(line));
                 }
             }
 
             File.WriteAllLines(PasswordFile, lines);
         }
 
-        private string FormatPasswordEntry(string description, string password)
-        {
-            // Mask password: First 3 characters + ......
-            string maskedPassword = password.Length <= 3 
-                ? password 
-                : password.Substring(0, 3) + "......";
-            
-            return $"{description} → {maskedPassword}";
-        }
+        // ====== ENCRYPTION HELPERS ======
+        private static readonly byte[] EncryptionKey = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes("VirtualKeyboard_Secret_Key_2025"));
+        private static readonly byte[] EncryptionIV = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes("VirtualKeyboard_IV"));
 
-        private string ExtractPassword(string formattedEntry)
+        private static string Encrypt(string plainText)
         {
-            string[] parts = formattedEntry.Split(new[] { " → " }, StringSplitOptions.None);
-            if (parts.Length != 2) return "";
+            if (string.IsNullOrEmpty(plainText)) return "";
             
-            string maskedPassword = parts[1].Trim();
-            
-            // Match masked password with real password
-            // Find real password from file
-            return GetRealPassword(parts[0].Trim(), maskedPassword);
-        }
-
-        private string GetRealPassword(string description, string maskedPassword)
-        {
-            if (!File.Exists(PasswordFile))
+            try
             {
-                return "";
-            }
-
-            string[] lines = File.ReadAllLines(PasswordFile);
-            foreach (string line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                string[] parts = line.Split('|');
-                if (parts.Length == 2 && parts[0] == description)
+                using (Aes aes = Aes.Create())
                 {
-                    return parts[1]; // Return real password
+                    aes.Key = EncryptionKey;
+                    aes.IV = EncryptionIV;
+
+                    ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                    using (MemoryStream msEncrypt = new MemoryStream())
+                    {
+                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                        {
+                            using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                            {
+                                swEncrypt.Write(plainText);
+                            }
+                            return Convert.ToBase64String(msEncrypt.ToArray());
+                        }
+                    }
                 }
             }
+            catch
+            {
+                return plainText;
+            }
+        }
 
-            return "";
+        private static string Decrypt(string cipherText)
+        {
+            if (string.IsNullOrEmpty(cipherText)) return "";
+
+            try
+            {
+                // Check if it's likely encrypted (Base64)
+                // Simple check: if it contains '|' it might be plain text (legacy format)
+                if (cipherText.Contains("|") && !IsBase64(cipherText))
+                {
+                    return cipherText;
+                }
+
+                byte[] cipherBytes;
+                try
+                {
+                    cipherBytes = Convert.FromBase64String(cipherText);
+                }
+                catch
+                {
+                    // Not base64, assume plain text
+                    return cipherText;
+                }
+
+                using (Aes aes = Aes.Create())
+                {
+                    aes.Key = EncryptionKey;
+                    aes.IV = EncryptionIV;
+
+                    ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                    using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
+                    {
+                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        {
+                            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                            {
+                                return srDecrypt.ReadToEnd();
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return cipherText;
+            }
+        }
+
+        private static bool IsBase64(string s)
+        {
+            try
+            {
+                Convert.FromBase64String(s);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private class PasswordEntry
+        {
+            public string Description { get; set; } = "";
+            public string Username { get; set; } = "";
+            public string Separator { get; set; } = "TAB";
+            public string Password { get; set; } = "";
+            public int TypingSpeed { get; set; } = 50;
         }
     }
 }

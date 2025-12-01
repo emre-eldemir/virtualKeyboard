@@ -50,8 +50,11 @@ This application **solves all these problems** by simulating keyboard input at t
   - Turkish characters (ı, ğ, ü, ş, ö, ç, İ, Ğ, Ü, Ş, Ö, Ç)
 
 ### 🔐 Password Manager
-- **Secure Local Storage**: Passwords stored in encrypted local file
-- **Masked Display**: Passwords shown as "Abc......" in the list for privacy
+- **Secure Local Storage**: Passwords stored in **encrypted** local file (AES)
+- **Username & Sequence Support**: Send `Username` → `Separator` (Tab/Enter) → `Password` automatically
+- **Configurable Typing Speed**: Set custom typing speed (ms) for each entry
+- **Table View**: Organized grid view for managing credentials
+- **Masked Display**: Passwords shown as "******" in the list for privacy
 - **Quick Send**: Double-click to send password instantly
 - **Auto-Enter Option**: Toggle to automatically press ENTER after sending password
 - **Easy Management**: Add, delete, and organize passwords with descriptions
@@ -117,16 +120,19 @@ Store frequently-used passwords and send them reliably to any application.
 
 #### Saving a Password
 1. Enter a **description** (e.g., "AWS Root SSH", "Production Server")
-2. Enter your **password**
-3. Click **"Save"**
-4. Password is stored locally and appears masked in the list
+2. (Optional) Enter a **username**
+3. Select a **separator** (TAB or ENTER) to send between username and password
+4. Enter your **password**
+5. (Optional) Adjust **typing speed** (default 50ms)
+6. Click **"Save"**
+7. Password is stored locally and appears masked in the list
 
 #### Sending a Password
-1. **Select** the password from the list
-2. Click **"Send Selected Password"** (or double-click the password)
-3. **Within the delay time**, click on the password field
-4. Password is typed automatically
-5. If **"Auto-press ENTER"** is enabled, ENTER key is pressed after password
+1. **Select** the entry from the list
+2. Click **"Send Selected Password"** (or double-click the entry)
+3. **Within the delay time**, click on the target field (e.g., username field)
+4. The application will type: **Username** → **Separator** → **Password**
+5. If **"Auto-press ENTER"** is enabled, ENTER key is pressed at the end
 
 ### Settings
 
@@ -151,8 +157,8 @@ Store frequently-used passwords and send them reliably to any application.
 
 ### ⚠️ Important Notes
 
-- Passwords are stored in **plain text** in `passwords.txt` in the application directory
-- This is designed for **convenience**, not maximum security
+- Passwords are stored **encrypted (AES)** in `passwords.txt` in the application directory
+- This is designed for **convenience**, not maximum security (key is embedded in the application)
 - **Do not use** for highly sensitive passwords (banking, email, etc.)
 - **Best for**: SSH passwords, test environment credentials, frequently-used service accounts
 
@@ -193,13 +199,8 @@ Planned features for future releases:
 
 ### File Format
 
-Passwords are stored in `passwords.txt`:
-```
-Description|Password
-AWS Root SSH|MyP@ssw0rd123
-Production Server|Pr0ductionS3cr3t
-GitHub Token|ghp_1234567890abcdefghij
-```
+Passwords are stored in `passwords.txt` as **encrypted strings**.
+Decrypted format: `Description|Username|Separator|Password|Speed`
 
 ---
 
@@ -245,8 +246,11 @@ git push origin feature/my-feature
 
 ## 📝 Roadmap
 
-### Version 1.1 (Planned)
-- [ ] Password encryption
+### Version 1.1 (Released)
+- [x] Password encryption
+- [x] Username & Separator support
+- [x] Configurable typing speed
+- [x] Table view for passwords
 - [ ] Master password protection
 - [ ] Import/Export password database
 - [ ] Keyboard shortcuts (hotkeys)
