@@ -146,7 +146,7 @@ Store frequently-used passwords and send them reliably to any application.
 ### Main Interface
 
 <div align="center">
-  <img src="screenshots/main-interface.png" alt="Virtual Keyboard Main Interface" width="800"/>
+  <img src="screenshots/main-interface.1.1.png" alt="Virtual Keyboard Main Interface" width="800"/>
   
   *The application features two main sections: Manual Text Sending and Password Manager with customizable delay and auto-ENTER option*
 </div>
